@@ -1,6 +1,12 @@
 import json
 import uuid
 
+headers_open = {
+    "Access-Control-Allow-Origin": "*",
+    "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE",
+    "Access-Control-Allow-Headers": "Content-Type"
+}
+
 # In-memory data storage
 electric_scooters = []
 
@@ -18,6 +24,7 @@ def lambda_handler(event, context):
     else:
         return {
             'statusCode': 405,
+            'headers': headers_open,
             'body': json.dumps({'message': 'Method Not Allowed'})
         }
 
@@ -25,6 +32,7 @@ def lambda_handler(event, context):
 def get_scooters(event):
     return {
         'statusCode': 200,
+        'headers': headers_open,
         'body': json.dumps(electric_scooters)
     }
 
@@ -41,6 +49,7 @@ def create_scooter(event):
     electric_scooters.append(scooter)
     return {
         'statusCode': 201,
+        'headers': headers_open,
         'body': json.dumps(scooter)
     }
 
@@ -56,10 +65,12 @@ def update_scooter(event):
             scooter['autonomia'] = body['autonomia']
             return {
                 'statusCode': 200,
+                'headers': headers_open,
                 'body': json.dumps(scooter)
             }
     return {
         'statusCode': 404,
+        'headers': headers_open,
         'body': json.dumps({'message': 'Scooter not found'})
     }
 
@@ -69,5 +80,6 @@ def delete_scooter(event):
     global electric_scooters
     electric_scooters = [scooter for scooter in electric_scooters if scooter['id'] != scooter_id]
     return {
-        'statusCode': 204
+        'statusCode': 204,
+        'headers': headers_open
     }
