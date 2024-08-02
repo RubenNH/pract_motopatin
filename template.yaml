@@ -1,0 +1,69 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Serverless Application for managing Patín Eléctrico
+
+Globals:
+  Function:
+    Timeout: 5
+    MemorySize: 128
+
+Resources:
+
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: LambdaBasicExecution
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - logs:CreateLogGroup
+                  - logs:CreateLogStream
+                  - logs:PutLogEvents
+                Resource: arn:aws:logs:*:*:*
+
+  ScooterFunction:
+    Type: 'AWS::Serverless::Function'
+    Properties:
+      Handler: app.lambda_handler
+      Runtime: python3.12
+      CodeUri: lambdas/mono_patin/
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Architectures:
+        - x86_64
+      Events:
+        GetScooters:
+          Type: Api
+          Properties:
+            Path: /scooters
+            Method: GET
+        CreateScooter:
+          Type: Api
+          Properties:
+            Path: /scooters
+            Method: POST
+        UpdateScooter:
+          Type: Api
+          Properties:
+            Path: /scooters/{id}
+            Method: PUT
+        DeleteScooter:
+          Type: Api
+          Properties:
+            Path: /scooters/{id}
+            Method: DELETE
+
+Outputs:
+  ScooterApi:
+    Description: "API Gateway endpoint URL for Scooter Function"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/scooters/"
